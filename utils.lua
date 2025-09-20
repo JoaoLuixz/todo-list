@@ -1,27 +1,37 @@
 local utils = {};
+utils.todoCount = 0;
 
 function utils.createNecessaryFiles()
-  local db = io.open(".\\db\\todos.json", "w");
+  local db = io.open(".\\db\\todos.json", "r");
 
-  if not file then
+  if not db then
     os.execute("mkdir db");
+    db = io.open(".\\db\\todos.json", "w"):write("[]")
+    print("Database created")
   end
 
-  db = io.open(".\\db\\todos.json", "w");
-  db:write("[]");
   db:close();
-  print("Files created!")
 end
 
-function utils.addTodo(content)
+function utils:addTodo(content)
   local db = io.open(".\\db\\todos.json", "r");
   local allDbContent = db:read("*a");
-  print(allDbContent)
-  local formattedContent = string.format("{\"content\":\"%s\", \"status\":false},", content);
   db:close();
+
+  local formattedContent = string.format("{\"id\":%d, \"content\":\"%s\", \"status\":false}", self.todoCount, content);
+
   db = io.open(".\\db\\todos.json", "w");
-  print(formattedContent);
-  db:write(string.format("%s %s %s", string.sub(allDbContent, 1, #allDbContent - 1), formattedContent, string.sub(allDbContent, -1) ))
-  db:close()
+  db:write(string.format("%s%s", string.sub(allDbContent, 1, #allDbContent - 1), self.todoCount ~= 0 and "," or "\n"));
+  db:close();
+
+  db = io.open(".\\db\\todos.json", "a");
+
+  db:write(formattedContent)
+
+  db:write("\n]");
+  print(self.todoCount);
+  self.todoCount = self.todoCount + 1;
+  db:close();
 end
+
 return utils
