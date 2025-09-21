@@ -1,5 +1,22 @@
 local utils = {};
-utils.todoCount = 0;
+
+function utils.getHighestTodoIndex()
+  local db = io.open(".\\db\\todos.json", "r");
+  local highestTodoId = 0;
+
+  for line in db:lines() do
+    if #line > 1 then
+      local startIdIndex, endIdIndex = string.find(line, "%d+")
+      local todoId = tonumber(line:sub(startIdIndex, endIdIndex));
+      highestTodoId = highestTodoId > todoId and highestTodoId or todoId;
+    end
+  end
+  db:close()
+
+  return highestTodoId
+end
+
+utils.highestTodoIndex = utils.getHighestTodoIndex();
 
 function utils.createNecessaryFiles()
   local db = io.open(".\\db\\todos.json", "r");
@@ -18,10 +35,10 @@ function utils:addTodo(content)
   local allDbContent = db:read("*a");
   db:close();
 
-  local formattedContent = string.format("{\"id\":%d, \"content\":\"%s\", \"status\":false}", self.todoCount, content);
+  local formattedContent = string.format("{\"id\":%d, \"content\":\"%s\", \"status\":false}", self.highestTodoIndex, content);
 
   db = io.open(".\\db\\todos.json", "w");
-  db:write(string.format("%s%s", string.sub(allDbContent, 1, #allDbContent - 1), self.todoCount ~= 0 and "," or "\n"));
+  db:write(string.format("%s%s", string.sub(allDbContent, 1, #allDbContent - 1), self.highestTodoIndex ~= 0 and "," or "\n"));
   db:close();
 
   db = io.open(".\\db\\todos.json", "a");
@@ -29,8 +46,8 @@ function utils:addTodo(content)
   db:write(formattedContent)
 
   db:write("\n]");
-  print(self.todoCount);
-  self.todoCount = self.todoCount + 1;
+  print(self.highestTodoIndex);
+  self.highestTodoIndex = self.highestTodoIndex + 1;
   db:close();
 end
 
