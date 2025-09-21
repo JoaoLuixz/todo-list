@@ -34,4 +34,25 @@ function utils:addTodo(content)
   db:close();
 end
 
+function utils.removeTodo(id)
+  local db = io.open(".\\db\\todos.json", "r");
+  local updatedDbContent = "[";
+
+  for line in db:lines() do
+    if #line > 1 then
+      local todoId = tonumber(string.match(line, "%d+"));
+
+      if todoId ~= id then
+        updatedDbContent = updatedDbContent .. "\n" .. line;
+      end
+    end
+  end
+
+  updatedDbContent = updatedDbContent .. "\n]";
+
+  db = io.open(".\\db\\todos.json", "w"):write(updatedDbContent)
+  db:close();
+
+end
+
 return utils
