@@ -41,7 +41,6 @@ function utils.removeTodo(id)
   for line in db:lines() do
     if #line > 1 then
       local todoId = tonumber(string.match(line, "%d+"));
-
       if todoId ~= id then
         updatedDbContent = updatedDbContent .. "\n" .. line;
       end
@@ -49,10 +48,37 @@ function utils.removeTodo(id)
   end
 
   updatedDbContent = updatedDbContent .. "\n]";
-
+  db:close()
   db = io.open(".\\db\\todos.json", "w"):write(updatedDbContent)
   db:close();
+end
 
+function utils.updateTodo(id) 
+  local db = io.open(".\\db\\todos.json", "r");
+  local updatedDbContent = "[";
+
+  local finishedTodoPattern = "\"status\":true}"
+  local unFinishedTodoPattern = "\"status\":false}"
+  
+  for line in db:lines() do
+    if #line > 1 then
+      local todoId = tonumber(string.match(line, "%d+"));
+      if todoId == id then
+        if string.find(line, finishedTodoPattern.."$") then
+          line = string.gsub(line, finishedTodoPattern, unFinishedTodoPattern);
+        else
+          line = string.gsub(line, unFinishedTodoPattern, finishedTodoPattern);
+      end
+        print(line)
+      end
+      updatedDbContent = updatedDbContent .. "\n" .. line;
+    end
+  end
+  updatedDbContent = updatedDbContent .. "\n]";
+
+  db:close();
+  db = io.open(".\\db\\todos.json", "w"):write(updatedDbContent);
+  db:close();
 end
 
 return utils
